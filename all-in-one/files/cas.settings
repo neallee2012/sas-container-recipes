@@ -1,0 +1,21 @@
+#
+# This file contains site specific environment variables needed for CAS startup.
+#
+
+# The root directory of your Hadoop install (optional).
+#export HADOOP_HOME=/opt/hadoop
+
+# Host name of Hadoop NameNode (default is controller node)
+#export HADOOP_NAMENODE=machine01
+
+# A colon-separated list of paths that are used for temporarily memory mapping
+# tables when the data exceeds the allowed resident memory size. If unset,
+# defaults to /tmp.
+#export CAS_DISK_CACHE=/vol1/data:/vol2/data
+
+# Another location for temporary files. If unset, defaults to /tmp.
+#export TKOPT_ENV_UTILLOC=/vol1/tmp
+
+# JAVA_HOME and LD_LIBRARY_PATH fixes
+export JAVA_HOME=/lib/jvm/jre-1.8.0-openjdk-1.8.0.171-8.b10.el7_5.x86_64:/lib/jvm/jre-1.8.0-openjdk:/usr/lib/jvm/jre-1.8.0
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JAVA_HOME/lib/amd64/server:/opt/sas/viya/home/SASFoundation/sasexe:/opt/sas/viya/home/lib64

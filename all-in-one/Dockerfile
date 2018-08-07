@@ -128,7 +128,7 @@ RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.
 
 # ansible-based install of SAS
 # we bury this inside the install_sas script to make it easier to run the same process on bare-metal
-ENV sasORDER="09MXJC"
+ENV sasORDER="09MZPN"
 COPY download/$sasORDER/SAS_Viya_deployment_data.zip /opt/sas/install/SAS_Viya_deployment_data.zip
 COPY files/install_sas /opt/sas/install
 RUN /opt/sas/install/install_sas
@@ -146,6 +146,7 @@ HEALTHCHECK CMD curl --fail http://localhost/SASStudio || exit 1
 
 EXPOSE 80
 
+COPY files/cas.settings /opt/sas/viya/home/SASFoundation/cas.settings
 COPY files/start.sh /start.sh
 
 ENTRYPOINT ["/start.sh"]

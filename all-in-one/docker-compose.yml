@@ -9,7 +9,7 @@ version: '3'
 services:
   sasawb:
     build: .
-    image: docker.sas.com/sasap/viya-3.4:0.2
+    image: neallee/viya-3.4
     privileged: true
     cap_add:
       - SYS_ADMIN

@@ -67,6 +67,11 @@ RUN rpmdb --rebuilddb; \
        ; \
     yum clean all
 
+# to enable access to remote CAS
+ENV remoteCASHOST="remote_cas_hostname" \
+    remoteCASUSER="user_name" \
+    remoteCASPASSWD="password" \
+    remoteCASAUTHINFO="authinfo_file_name"
 
 # prerequisites and get systemd going
 RUN sed -i "/keepcache=/c\keepcache=1" /etc/yum.conf; \
@@ -77,9 +82,14 @@ RUN sed -i "/keepcache=/c\keepcache=1" /etc/yum.conf; \
     chmod 600 ~/.ssh/authorized_keys ; \
     echo "host localhost user sasdemo password sasDEMO" > ~/.authinfo ; \
     chmod 0600 ~/.authinfo; \
+    echo "host ${remoteCASHOST} user ${remoteCASUSER} password ${remoteCASPASSWD}" > ~/.${remoteCASAUTHINFO} ; \
+    chmod 0600 ~/.authinfomm; \
     cp ~/.authinfo /home/sasdemo/.authinfo; \
     chown sasdemo /home/sasdemo/.authinfo; \
     chmod 0600 /home/sasdemo/.authinfo; \
+    cp ~/.${remoteCASAUTHINFO} /home/sasdemo/.${remoteCASAUTHINFO}; \
+    chown sasdemo /home/sasdemo/.${remoteCASAUTHINFO}; \
+    chmod 0600 /home/sasdemo/.${remoteCASAUTHINFO}; \
     systemctl enable systemd-user-sessions
 
 
@@ -130,7 +140,7 @@ RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.
 
 # ansible-based install of SAS
 # we bury this inside the install_sas script to make it easier to run the same process on bare-metal
-ENV sasORDER="09MZPN"
+ENV sasORDER="09N7M8"
 COPY download/$sasORDER/SAS_Viya_deployment_data.zip /opt/sas/install/SAS_Viya_deployment_data.zip
 COPY files/install_sas /opt/sas/install
 RUN /opt/sas/install/install_sas
@@ -140,7 +150,10 @@ RUN /opt/sas/install/install_sas
 COPY files/notebooks  /home/sasdemo/notebooks
 RUN chown -R sasdemo:sas /home/sasdemo
 
-
+# to enable access to remote CAS, append vault-ca.crt of remote CAS sever to trustedcerts.pem
+COPY files/vault-deployTarget-ca.crt /tmp/vault-deployTarget-ca.crt
+RUN cat /tmp/vault-deployTarget-ca.crt >> /opt/sas/viya/config/etc/SASSecurityCertificateFramework/cacerts/trustedcerts.pem; \
+    rm /tmp/vault-deployTarget-ca.crt
 # ask httpd to proxy our apps
 COPY files/proxy.conf /etc/httpd/conf.d/proxy.conf
 

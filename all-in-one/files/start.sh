@@ -21,8 +21,6 @@ rm -f /etc/init.d/sas-viya-watch-log-default
 
 /etc/init.d/sas-viya-all-services start
 
-
-
 #
 # Set servername to match container name
 # Start httpd
@@ -31,14 +29,21 @@ echo "ServerName $(hostname -i):80" >> /etc/httpd/conf/httpd.conf
 httpd
 
 # Start RStudio Server
-# /usr/lib/rstudio-server/bin/rserver --server-daemonize 0 &
+echo "Start RStudio Server"
+/usr/lib/rstudio-server/bin/rserver --server-daemonize 0 &
 
 #
+# Setup Jupyter
+#
+echo "Setup Jupyter"
+#su -c "/opt/anaconda3/bin/jupyter notebook --generate-config" sasdemo &
+#sleep 2
+#su -c "echo \"c.NotebookApp.password = u'sha1:ca6666f878fe:e1c67e86bad4b73fb7f44995edb54a7a1ba05e56'\" >> ~/.jupyter/jupyter_notebook_config.py" sasdemo &
+
 # Start Jupyter
 #
-su -c '/opt/anaconda3/bin/jupyter-notebook --ip="*" --no-browser --notebook-dir=/home/sasdemo --NotebookApp.base_url=/Jupyter' sasdemo &
+su -c "/opt/anaconda3/bin/jupyter notebook --generate-config && echo \"c.NotebookApp.password = u'sha1:ca6666f878fe:e1c67e86bad4b73fb7f44995edb54a7a1ba05e56'\" >> ~/.jupyter/jupyter_notebook_config.py && /opt/anaconda3/bin/jupyter-notebook --ip="*" --no-browser --notebook-dir=/home/sasdemo --NotebookApp.base_url=/Jupyter" sasdemo &
 sleep 5
-
 
 #
 # Write out a help page to be displayed when browsing port 80
@@ -49,11 +54,9 @@ cat > /var/www/html/index.html <<'EOF'
  <p> Access the software by browsing to:
  <ul>
   <li> <b><a href="/SASStudio">/SASStudio</a></b>
-  <li> <b><a href="/RStudio/auth-sign-in">/RStudio</a></b> (Not installed by default)
+  <li> <b><a href="/RStudio/auth-sign-in">/RStudio</a></b>
   <li> <b><a href="/Jupyter">/Jupyter</a></b>
  </ul>
-
- <p> Use the <b>sasdemo</b> / <b>sasDEMO</b> login to access SAS Studio, CAS, and Jupyter.
 </html>
 EOF
 
@@ -66,4 +69,3 @@ while true
 do
   tail -f /dev/null & wait ${!}
 done
-

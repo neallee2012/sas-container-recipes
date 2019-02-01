@@ -1,0 +1,83 @@
+# CAS Launcher Configuration
+#
+# The file must start with the first line as shown in this
+# prototype file. Setting names are case-insensitive.
+
+#
+# Specify the location of the CAS shell script. The first
+# argument to the shell script is the location of the CAS
+# executable. All options specified to the launcher as well
+# as options specified at runtime by a launch request from
+# CAS main will be added to this command line.
+# This is a MANDATORY setting.
+#
+server=CASLAUNCH/cas.sh CASLAUNCH/cas
+
+#
+# Specify the location of the launcher log file. Formatting
+# allows for a string substitution which will be replaced
+# by the hostname and a numeric substiution which will be
+# replaced by the PID. This is an optional setting.
+#
+# log=/opt/sas/viya/config/var/log/cas/default/caslaunch_%s_%d.log
+
+#
+# Specify the level of logging required. This log level will
+# apply to all logs specified in the configuration file. Valid
+# levels are "info" and "debug", case-insensitive. Optional.
+# The default is "info".
+#
+# logLevel=debug
+
+#
+# Specify the location of the CAS Launch Services log file.
+# Formatting allows for a string substitution which will be
+# replaced by the hostname and a numeric substiution which
+# will be replaced by the PID. This is an optional setting.
+#
+# launchLog=/opt/sas/viya/config/var/log/cas/default/launchsvcs_%s_%d.log
+
+#
+# The launch of the CAS server should be done using the supplied
+# host identity (POSIX identity). This requires that the launcher
+# is run as root. If this option is set, and there is no host token
+# supplied obtained by client authentication, then the launch will
+# fail.
+#
+useHostToken
+
+#
+# When specifying useHostToken, POSIX attributes must be supplied
+# via host authentication (PAM or kerberos) in order to launch a session
+# process. It is possible to allow a mixed deployment where POSIX users
+# launch under POSIX identity, but non-POSIX users (OAuth2) run under
+# the service account used to run caslaunch.
+#
+launchUsingServiceIdentity
+
+#
+# When running as root, specify this option to restrict who is
+# allowed to run caslaunch to start a server. If this is not
+# specified, anyone can start a server. If caslaunch is not running
+# as root, this option is ignored.
+#
+restrictServerLaunch=cas
+
+#
+# An external identity provider, identsvcs, is used to perform
+# user authentication. This is typically used when root access is
+# required for authentication. This utilizes an external PAM provider
+# process for authentication. Of course, if root access is required
+# for authentication, the launcher must be running as root. In addition,
+# the external authentication provider should be configured for use by
+# the CAS server.
+#
+externalIdent
+
+#
+# Specify the location of the CAS Identity Services log file.
+# Formatting allows for a string substitution which will be
+# replaced by the hostname and a numeric substiution which
+# will be replaced by the PID. This is an optional setting.
+#
+# identLog=/opt/sas/viya/config/var/log/cas/default/identsvcs_%s_%d.log

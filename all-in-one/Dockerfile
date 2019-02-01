@@ -109,43 +109,17 @@ RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.
    /opt/anaconda3/bin/pip install ${swatRELEASE}/download/v${swatVERSION}/python-swat-${swatVERSION}-linux64.tar.gz; \
    rm /tmp/anaconda.shar
 
-
-#
-# R too? - uncomment this next block
-#
-
-# R
-RUN /opt/anaconda3/bin/conda install r r-essentials
-
-ENV rstuVERSION=1.1.442 \
-    rswatRELEASE="https://github.com/sassoftware/R-swat/releases" \
-    rswatVERSION=1.2.1
-
-# RStudio
-RUN wget -q -O /tmp/rstudio.rpm https://download2.rstudio.org/rstudio-server-rhel-${rstuVERSION}-x86_64.rpm; \
-    yum -y install /tmp/rstudio.rpm; \
-    rm -rf /tmp/rstudio.rpm
-
-COPY files/rserver.conf /etc/rstudio/rserver.conf
-
-# R-swat
-RUN yum -y install make; \
-    wget -q -O /tmp/r-swat-1.0.0-linux64.tar.gz https://github.com/sassoftware/R-swat/releases/download/v${rswatVERSION}/r-swat-${rswatVERSION}-linux64.tar.gz; \
-    /opt/anaconda3/bin/R CMD INSTALL /tmp/r-swat-${rswatVERSION}-linux64.tar.gz; \
-    rm -rf /tmp/r-swat-${rswatVERSION}-linux64.tar.gz
-
-
 # ansible-based install of SAS
 # we bury this inside the install_sas script to make it easier to run the same process on bare-metal
-ENV sasORDER="09N8FP"
+ENV sasORDER="09NB36"
 COPY download/$sasORDER/SAS_Viya_deployment_data.zip /opt/sas/install/SAS_Viya_deployment_data.zip
 COPY files/install_sas /opt/sas/install
 RUN /opt/sas/install/install_sas
 
 
 # samples
-COPY files/notebooks  /home/sasdemo/notebooks
-RUN chown -R sasdemo:sas /home/sasdemo
+#COPY files/notebooks  /home/sasdemo/notebooks
+#RUN chown -R sasdemo:sas /home/sasdemo
 
 # to enable access to remote CAS, append vault-ca.crt of remote CAS sever to trustedcerts.pem
 COPY files/vault-deployTarget-ca.crt /tmp/vault-deployTarget-ca.crt
@@ -153,8 +127,6 @@ RUN cat /tmp/vault-deployTarget-ca.crt >> /opt/sas/viya/config/etc/SASSecurityCe
     rm /tmp/vault-deployTarget-ca.crt
 # ask httpd to proxy our apps
 COPY files/proxy.conf /etc/httpd/conf.d/proxy.conf
-
-HEALTHCHECK CMD curl --fail http://localhost/SASStudio || exit 1
 
 EXPOSE 80
 

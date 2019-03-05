@@ -97,7 +97,7 @@ RUN sed -i "/keepcache=/c\keepcache=1" /etc/yum.conf; \
 ENV anaREPO="https://repo.continuum.io/archive" \
     anaVERSION="3-5.2.0" \
     swatRELEASE="https://github.com/sassoftware/python-swat/releases" \
-    swatVERSION="1.3.1"
+    swatVERSION="1.5.0"
 
 RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.sh; \
    bash /tmp/anaconda.shar -p /opt/anaconda3 -b; \
@@ -107,6 +107,7 @@ RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.
    /opt/anaconda3/bin/pip install msgpack; \
    /opt/anaconda3/bin/pip install sas-dlpy; \
    /opt/anaconda3/bin/pip install ${swatRELEASE}/download/v${swatVERSION}/python-swat-${swatVERSION}-linux64.tar.gz; \
+   /opt/anaconda3/bin/pip install inflection; \
    rm /tmp/anaconda.shar
 
 

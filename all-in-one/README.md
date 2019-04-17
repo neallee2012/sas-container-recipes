@@ -10,7 +10,7 @@ These examples are for a linux host that has git and docker installed.  You can 
 
 ```
 cd $HOME
-git clone https://github.com/sassoftware/sas-container-recipes.git
+git clone https://github.com/neallee2012/sas-container-recipes.git
 ```
 
 # How to build

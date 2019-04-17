@@ -9,7 +9,7 @@ version: '3'
 services:
   sasawb:
     build: .
-    image: neallee/development:2019012902
+    image: neallee/development:2019041601
     privileged: true
     cap_add:
       - SYS_ADMIN

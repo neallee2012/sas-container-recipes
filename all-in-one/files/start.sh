@@ -22,8 +22,9 @@ rm -f /etc/init.d/sas-viya-watch-log-default
 #/etc/init.d/sas-viya-all-services start
 
 # Run python scoring
+export 	CAS_CLIENT_SSL_CA_LIST=/opt/sas/viya/config/etc/SASSecurityCertificateFramework/cacerts/trustedcerts.pem
 su -c '/opt/anaconda3/bin/python3 /home/sasdemo/data/PythonScore.py' sasdemo
 # Run performance report
-su -c 'cd /home/sasdemo/data && export SSLCALISTLOC=/opt/sas/viya/config/etc/SASSecurityCertificateFramework/cacerts/trustedcerts.pem && /opt/sas/spre/home/bin/sas /home/sasdemo/data/Create_Performance_Report.sas' sasdemo
+#su -c 'cd /home/sasdemo/data && export SSLCALISTLOC=/opt/sas/viya/config/etc/SASSecurityCertificateFramework/cacerts/trustedcerts.pem && /opt/sas/spre/home/bin/sas /home/sasdemo/data/Create_Performance_Report.sas' sasdemo
 
 exit 0

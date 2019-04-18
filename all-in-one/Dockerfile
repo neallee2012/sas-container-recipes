@@ -27,26 +27,12 @@ yum -y install yum-plugin-ovl
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
 
-# users for SAS
-# TODO -- use real users, and LDAP/AD for auth/passwords
-RUN groupadd -g 1001 sas; \
-    useradd -u 1001 -g sas sas; \
-    useradd -u 1002 -g sas cas; \
-    useradd -u 1003 -g sas sasdemo; \
-    sh -c 'echo "sasSAS" | passwd "sas" --stdin'; \
-    sh -c 'echo "sasCAS" | passwd "cas" --stdin'; \
-    sh -c 'echo "sasDEMO" | passwd "sasdemo" --stdin'
-
-
-# install prerequisite packages
 RUN rpmdb --rebuilddb; \
     yum -y install epel-release; \
     yum -y install \
-       ansible \
        bzip2 \
        deltarpm \
        git \
-       httpd \
        initscripts \
        iproute \
        java-1.8.0-openjdk \
@@ -67,72 +53,32 @@ RUN rpmdb --rebuilddb; \
        ; \
     yum clean all
 
-# to enable access to remote CAS
-ENV remoteCASHOST="10.240.0.6" \
-    remoteCASUSER="viyademo01" \
-    remoteCASPASSWD="demopw" \
-    remoteCASAUTHINFO="authinfomm"
-
-# prerequisites and get systemd going
-RUN sed -i "/keepcache=/c\keepcache=1" /etc/yum.conf; \
-    sh -c 'echo "*     -     nofile     50000" >> /etc/security/limits.conf'; \
-    sed -i.bak -e 's/4096/65536/g' /etc/security/limits.d/20-nproc.conf; \
-    ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa; \
-    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys; \
-    chmod 600 ~/.ssh/authorized_keys ; \
-    echo "host localhost user sasdemo password sasDEMO" > ~/.authinfo ; \
-    chmod 0600 ~/.authinfo; \
-    echo "host ${remoteCASHOST} user ${remoteCASUSER} password ${remoteCASPASSWD}" > ~/.${remoteCASAUTHINFO} ; \
-    chmod 0600 ~/.authinfomm; \
-    cp ~/.authinfo /home/sasdemo/.authinfo; \
-    chown sasdemo /home/sasdemo/.authinfo; \
-    chmod 0600 /home/sasdemo/.authinfo; \
-    cp ~/.${remoteCASAUTHINFO} /home/sasdemo/.${remoteCASAUTHINFO}; \
-    chown sasdemo /home/sasdemo/.${remoteCASAUTHINFO}; \
-    chmod 0600 /home/sasdemo/.${remoteCASAUTHINFO}; \
-    systemctl enable systemd-user-sessions
-
-
 # install anaconda/python
 ENV anaREPO="https://repo.continuum.io/archive" \
     anaVERSION="3-5.2.0" \
     swatRELEASE="https://github.com/sassoftware/python-swat/releases" \
-    swatVERSION="1.3.1"
+    swatVERSION="1.5.0"
 
 RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.sh; \
    bash /tmp/anaconda.shar -p /opt/anaconda3 -b; \
    /opt/anaconda3/bin/conda update conda; \
-   /opt/anaconda3/bin/pip install jupyterlab; \
    /opt/anaconda3/bin/pip install sas_kernel; \
+   /opt/anaconda3/bin/pip install ${swatRELEASE}/download/v${swatVERSION}/python-swat-${swatVERSION}-linux64.tar.gz; \
    /opt/anaconda3/bin/pip install msgpack; \
    /opt/anaconda3/bin/pip install sas-dlpy; \
-   /opt/anaconda3/bin/pip install ${swatRELEASE}/download/v${swatVERSION}/python-swat-${swatVERSION}-linux64.tar.gz; \
+   /opt/anaconda3/bin/pip install inflection; \
+   /opt/anaconda3/bin/pip install pandas==0.23.0; \
+   /opt/anaconda3/bin/pip install numpy==1.14.3; \
+   /opt/anaconda3/bin/pip install scikit-learn==0.20.3; \
+   /opt/anaconda3/bin/pip install xgboost==0.82; \
+   /opt/anaconda3/bin/pip install git+https://twnnel:oymjG8nykWqP1nycsAZS@gitlab.sas.com/SAS-AP/viya-py-api.git; \
    rm /tmp/anaconda.shar
 
-# ansible-based install of SAS
-# we bury this inside the install_sas script to make it easier to run the same process on bare-metal
-ENV sasORDER="09NB36"
-COPY download/$sasORDER/SAS_Viya_deployment_data.zip /opt/sas/install/SAS_Viya_deployment_data.zip
-COPY files/install_sas /opt/sas/install
-RUN /opt/sas/install/install_sas
+RUN groupadd -g 1001 sas; \
+    useradd -u 1003 -g sas sasdemo;
 
 
-# samples
-#COPY files/notebooks  /home/sasdemo/notebooks
-#RUN chown -R sasdemo:sas /home/sasdemo
-
-# to enable access to remote CAS, append vault-ca.crt of remote CAS sever to trustedcerts.pem
-COPY files/vault-deployTarget-ca.crt /tmp/vault-deployTarget-ca.crt
-RUN cat /tmp/vault-deployTarget-ca.crt >> /opt/sas/viya/config/etc/SASSecurityCertificateFramework/cacerts/trustedcerts.pem; \
-    rm /tmp/vault-deployTarget-ca.crt
-# ask httpd to proxy our apps
-COPY files/proxy.conf /etc/httpd/conf.d/proxy.conf
-
-EXPOSE 80
-
-COPY files/launchconfig_viya_default /opt/sas/viya/home/SASFoundation/utilities/bin/launchconfig_viya_default
-COPY files/cas.settings /opt/sas/viya/home/SASFoundation/cas.settings
 COPY files/start.sh /start.sh
 
+COPY files/vault-deployTarget-ca.crt /opt/sas/viya/config/etc/SASSecurityCertificateFramework/cacerts/trustedcerts.pem
 ENTRYPOINT ["/start.sh"]
-

@@ -92,6 +92,12 @@ RUN sed -i "/keepcache=/c\keepcache=1" /etc/yum.conf; \
     chmod 0600 /home/sasdemo/.${remoteCASAUTHINFO}; \
     systemctl enable systemd-user-sessions
 
+# ansible-based install of SAS
+# we bury this inside the install_sas script to make it easier to run the same process on bare-metal
+ENV sasORDER="09N8FP"
+COPY download/$sasORDER/SAS_Viya_deployment_data.zip /opt/sas/install/SAS_Viya_deployment_data.zip
+COPY files/install_sas /opt/sas/install
+RUN /opt/sas/install/install_sas
 
 # install anaconda/python
 ENV anaREPO="https://repo.continuum.io/archive" \
@@ -101,25 +107,18 @@ ENV anaREPO="https://repo.continuum.io/archive" \
 
 RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.sh; \
    bash /tmp/anaconda.shar -p /opt/anaconda3 -b; \
-   /opt/anaconda3/bin/conda update conda; \
-   /opt/anaconda3/bin/pip install jupyterlab; \
-   /opt/anaconda3/bin/pip install sas_kernel; \
-   /opt/anaconda3/bin/pip install msgpack; \
-   /opt/anaconda3/bin/pip install sas-dlpy; \
-   /opt/anaconda3/bin/pip install ${swatRELEASE}/download/v${swatVERSION}/python-swat-${swatVERSION}-linux64.tar.gz; \
-   /opt/anaconda3/bin/pip install inflection; \
-   /opt/anaconda3/bin/pip install pandas==0.23.0; \
-   /opt/anaconda3/bin/pip install numpy==1.14.3; \
-   /opt/anaconda3/bin/pip install scikit-learn==0.20.3; \
-   /opt/anaconda3/bin/pip install xgboost==0.82; \
-   /opt/anaconda3/bin/pip install git+https://twnnel:oymjG8nykWqP1nycsAZS@gitlab.sas.com/SAS-AP/viya-py-api.git; \
-   rm /tmp/anaconda.shar
-
+   /opt/anaconda3/bin/conda update conda
 
 #
 # R too? - uncomment this next block
-#
 
+
+# R-swat
+RUN yum -y install make; \
+    wget -q -O /tmp/r-swat-1.0.0-linux64.tar.gz https://github.com/sassoftware/R-swat/releases/download/v${rswatVERSION}/r-swat-${rswatVERSION}-linux64.tar.gz; \
+    /opt/anaconda3/bin/R CMD INSTALL /tmp/r-swat-${rswatVERSION}-linux64.tar.gz; \
+    rm -rf /tmp/r-swat-${rswatVERSION}-linux64.tar.gz
+   
 # R
 RUN /opt/anaconda3/bin/conda install r r-essentials
 
@@ -134,20 +133,19 @@ RUN wget -q -O /tmp/rstudio.rpm https://download2.rstudio.org/rstudio-server-rhe
 
 COPY files/rserver.conf /etc/rstudio/rserver.conf
 
-# R-swat
-RUN yum -y install make; \
-    wget -q -O /tmp/r-swat-1.0.0-linux64.tar.gz https://github.com/sassoftware/R-swat/releases/download/v${rswatVERSION}/r-swat-${rswatVERSION}-linux64.tar.gz; \
-    /opt/anaconda3/bin/R CMD INSTALL /tmp/r-swat-${rswatVERSION}-linux64.tar.gz; \
-    rm -rf /tmp/r-swat-${rswatVERSION}-linux64.tar.gz
-
-
-# ansible-based install of SAS
-# we bury this inside the install_sas script to make it easier to run the same process on bare-metal
-ENV sasORDER="09N8FP"
-COPY download/$sasORDER/SAS_Viya_deployment_data.zip /opt/sas/install/SAS_Viya_deployment_data.zip
-COPY files/install_sas /opt/sas/install
-RUN /opt/sas/install/install_sas
-
+Run /opt/anaconda3/bin/pip install jupyterlab; \
+   /opt/anaconda3/bin/pip install sas_kernel; \
+   /opt/anaconda3/bin/pip install ${swatRELEASE}/download/v${swatVERSION}/python-swat-${swatVERSION}-linux64.tar.gz; \
+   /opt/anaconda3/bin/pip install msgpack; \
+   /opt/anaconda3/bin/pip install sas-dlpy
+   
+Run /opt/anaconda3/bin/pip install inflection; \
+   /opt/anaconda3/bin/pip install pandas==0.23.0; \
+   /opt/anaconda3/bin/pip install numpy==1.14.3; \
+   /opt/anaconda3/bin/pip install scikit-learn==0.20.3; \
+   /opt/anaconda3/bin/pip install xgboost==0.82; \
+   /opt/anaconda3/bin/pip install git+https://twnnel:oymjG8nykWqP1nycsAZS@gitlab.sas.com/SAS-AP/viya-py-api.git@7566eb1290bce84d459cc0e40e909e92a423ab3a; \
+   rm /tmp/anaconda.shar
 
 # samples
 COPY files/notebooks  /home/sasdemo/notebooks

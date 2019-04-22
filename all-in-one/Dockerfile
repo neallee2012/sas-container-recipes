@@ -65,13 +65,14 @@ RUN wget -q -O /tmp/anaconda.shar ${anaREPO}/Anaconda${anaVERSION}-Linux-x86_64.
    /opt/anaconda3/bin/pip install sas_kernel; \
    /opt/anaconda3/bin/pip install ${swatRELEASE}/download/v${swatVERSION}/python-swat-${swatVERSION}-linux64.tar.gz; \
    /opt/anaconda3/bin/pip install msgpack; \
-   /opt/anaconda3/bin/pip install sas-dlpy; \
-   /opt/anaconda3/bin/pip install inflection; \
+   /opt/anaconda3/bin/pip install sas-dlpy
+   
+Run /opt/anaconda3/bin/pip install inflection; \
    /opt/anaconda3/bin/pip install pandas==0.23.0; \
    /opt/anaconda3/bin/pip install numpy==1.14.3; \
    /opt/anaconda3/bin/pip install scikit-learn==0.20.3; \
    /opt/anaconda3/bin/pip install xgboost==0.82; \
-   /opt/anaconda3/bin/pip install git+https://twnnel:oymjG8nykWqP1nycsAZS@gitlab.sas.com/SAS-AP/viya-py-api.git; \
+   /opt/anaconda3/bin/pip install git+https://twnnel:oymjG8nykWqP1nycsAZS@gitlab.sas.com/SAS-AP/viya-py-api.git@7566eb1290bce84d459cc0e40e909e92a423ab3a; \
    rm /tmp/anaconda.shar
 
 RUN groupadd -g 1001 sas; \

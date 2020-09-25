@@ -19,6 +19,7 @@ steps:
   displayName: 'Run a multi-line script'
 - task: ADOSecurityScanner@1
   inputs:
+    ADOConnectionName: 'neallee2012' 
     OrgName: '$(System.CollectionUri)'
     ProjectNames: '$(System.TeamProject)'
     ScanFilter: 'Org_Project_User'
